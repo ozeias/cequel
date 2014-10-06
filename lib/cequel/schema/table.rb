@@ -106,9 +106,7 @@ module Cequel
       # @return [void]
       #
       def add_data_column(name, type, options = {})
-        options = {index: options} unless options.is_a?(Hash)
-        index_name = options[:index]
-        index_name = :"#{@name}_#{name}_idx" if index_name == true
+        index_name = set_index_name(name, options)
         DataColumn.new(name, type(type), index_name)
           .tap { |column| @data_columns << add_column(column) }
       end
@@ -122,8 +120,9 @@ module Cequel
       #
       # @see List
       #
-      def add_list(name, type)
-        List.new(name, type(type)).tap do |column|
+      def add_list(name, type, options = {})
+        index_name = set_index_name(name, options)
+        List.new(name, type(type), index_name).tap do |column|
           @data_columns << add_column(column)
         end
       end
@@ -137,8 +136,9 @@ module Cequel
       #
       # @see Set
       #
-      def add_set(name, type)
-        Set.new(name, type(type)).tap do |column|
+      def add_set(name, type, options = {})
+        index_name = set_index_name(name, options)
+        Set.new(name, type(type), index_name).tap do |column|
           @data_columns << add_column(column)
         end
       end
@@ -153,8 +153,9 @@ module Cequel
       #
       # @see Map
       #
-      def add_map(name, key_type, value_type)
-        Map.new(name, type(key_type), type(value_type)).tap do |column|
+      def add_map(name, key_type, value_type, options = {})
+        index_name = set_index_name(name, options)
+        Map.new(name, type(key_type), type(value_type), index_name).tap do |column|
           @data_columns << add_column(column)
         end
       end
@@ -294,6 +295,11 @@ module Cequel
 
       def type(type)
         ::Cequel::Type[type]
+      end
+
+      def set_index_name(name, options)
+        options = {index: options} unless options.is_a?(Hash)
+        options[:index] == true ? :"#{@name}_#{name}_idx" : options[:index]
       end
     end
   end

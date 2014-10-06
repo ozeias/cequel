@@ -11,13 +11,16 @@ module Cequel
       attr_reader :name
       # @return [Type] the type of the column
       attr_reader :type
+      # @return [Symbol] name of the secondary index applied to this column, if
+      #   any
+      attr_reader :index_name
 
       #
       # @param name [Symbol] the name of the column
       # @param type [Type] the type of the column
       #
-      def initialize(name, type)
-        @name, @type = name, type
+      def initialize(name, type, index_name = nil)
+        @name, @type, @index_name = name, type, index_name
       end
 
       # rubocop:disable LineLength
@@ -55,7 +58,12 @@ module Cequel
         false
       end
 
-      # rubocop:enable LineLength
+      #
+      # @return [Boolean] true if this column has a secondary index
+      #
+      def indexed?
+        !!@index_name
+      end
 
       #
       # @return [Boolean] true if this is a data column
@@ -172,27 +180,6 @@ module Cequel
     # A scalar data column
     #
     class DataColumn < Column
-      #
-      # @return [Symbol] name of the secondary index applied to this column, if
-      #   any
-      #
-      attr_reader :index_name
-
-      #
-      # @param (see Column#initialize)
-      # @param index_name [Symbol] name this column's secondary index
-      #
-      def initialize(name, type, index_name = nil)
-        super(name, type)
-        @index_name = index_name
-      end
-
-      #
-      # @return [Boolean] true if this column has a secondary index
-      #
-      def indexed?
-        !!@index_name
-      end
     end
 
     #
@@ -204,11 +191,6 @@ module Cequel
       # (see Column#collection_column?)
       def collection_column?
         true
-      end
-
-      # (see DataColumn#indexed?)
-      def indexed?
-        false
       end
     end
 
@@ -270,8 +252,8 @@ module Cequel
       # @param key_type [Type] type of the keys in the map
       # @param value_type [Type] type of the values in the map
       #
-      def initialize(name, key_type, value_type)
-        super(name, value_type)
+      def initialize(name, key_type, value_type, index_name = nil)
+        super(name, value_type, index_name)
         @key_type = key_type
       end
 

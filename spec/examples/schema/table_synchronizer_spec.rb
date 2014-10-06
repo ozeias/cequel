@@ -13,7 +13,7 @@ describe Cequel::Schema::TableSynchronizer do
         column :title, :text
         column :body, :text
         column :created_at, :timestamp
-        set :author_names, :text
+        set :author_names, :text, :index => true
         with :comment, 'Test Table'
       end
     end
@@ -22,6 +22,10 @@ describe Cequel::Schema::TableSynchronizer do
 
     it 'should create table' do
       expect(table.column(:title).type).to eq(Cequel::Type[:text]) #etc.
+    end
+
+    it 'should add index to collection columns' do
+      expect(table.column(:author_names)).to be_indexed
     end
   end
 
@@ -51,7 +55,7 @@ describe Cequel::Schema::TableSynchronizer do
           column :primary_author_id, :uuid, :index => true
           column :created_at, :timestamp, :index => true
           column :published_at, :timestamp
-          set :author_names, :text
+          set :author_names, :text, :index => true
           list :categories, :text
           with :comment, 'Test Table 2.0'
         end
@@ -75,6 +79,10 @@ describe Cequel::Schema::TableSynchronizer do
 
       it 'should add index to existing columns' do
         expect(table.column(:created_at)).to be_indexed
+      end
+
+      it 'should add index to existing collection columns' do
+        expect(table.column(:author_names)).to be_indexed
       end
 
       it 'should drop index from existing columns' do
@@ -192,7 +200,6 @@ describe Cequel::Schema::TableSynchronizer do
       end
 
     end
-
 
   end
 

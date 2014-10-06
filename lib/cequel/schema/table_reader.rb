@@ -117,7 +117,8 @@ module Cequel
               read_collection_column(
                 result['column_name'],
                 $1.underscore,
-                *$2.split(',')
+                *$2.split(','),
+                result['index_name'].try(:to_sym)
               )
             else
               table.add_data_column(
@@ -130,10 +131,10 @@ module Cequel
         end
       end
 
-      def read_collection_column(name, collection_type, *internal_types)
+      def read_collection_column(name, collection_type, *internal_types, index_name)
         types = internal_types
           .map { |internal| Type.lookup_internal(internal) }
-        table.__send__("add_#{collection_type}", name.to_sym, *types)
+        table.__send__("add_#{collection_type}", name.to_sym, *types, index_name)
       end
 
       def read_properties

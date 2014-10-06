@@ -195,6 +195,7 @@ describe Cequel::Schema::TableReader do
         )
       CQL
       cequel.execute('CREATE INDEX ON posts (author_id)')
+      cequel.execute('CREATE INDEX ON posts (tags)')
     end
 
     it 'should read types of scalar data columns' do
@@ -207,6 +208,11 @@ describe Cequel::Schema::TableReader do
     it 'should read index attributes' do
       expect(table.data_columns.find { |column| column.name == :author_id }.index_name).
         to eq(:posts_author_id_idx)
+    end
+
+    it 'should read index attributes in a collection' do
+      expect(table.data_columns.find { |column| column.name == :tags }.index_name).
+        to eq(:posts_tags_idx)
     end
 
     it 'should leave nil index for non-indexed columns' do

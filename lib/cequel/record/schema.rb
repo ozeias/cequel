@@ -123,17 +123,17 @@ module Cequel
 
         def list(name, type, options = {})
           super
-          table_schema.add_list(name, type)
+          table_schema.add_list(name, type, options[:index])
         end
 
         def set(name, type, options = {})
           super
-          table_schema.add_set(name, type)
+          table_schema.add_set(name, type, options[:index])
         end
 
         def map(name, key_type, value_type, options = {})
           super
-          table_schema.add_map(name, key_type, value_type)
+          table_schema.add_map(name, key_type, value_type, options[:index])
         end
 
         def table_property(name, value)
