@@ -509,6 +509,23 @@ describe Cequel::Metal::DataSet do
       ).map { |row| row[:title] }).to eq(['Big Data', 'Cassandra'])
     end
 
+    it 'should build WHERE statement with CONTAINS' do
+      cequel.execute('CREATE INDEX ON posts (tags)')
+      cequel[:posts].insert(row_keys.merge(
+        blog_subdomain: 'big-data-weekly',
+        title: 'Cassandra',
+        tags: Set['cassandra', 'big-data'],
+      ))
+      cequel[:posts].insert(row_keys.merge(
+        blog_subdomain: 'bogus-blog',
+        title: 'Bogus Post',
+        tags: Set['bogus', 'posts'],
+      ))
+      expect(cequel[:posts].where(
+        :tags => Set['big-data']
+      ).map { |row| row[:title] }).to eq(['Cassandra'])
+    end
+
     it 'should use = if provided one-element array' do
       expect(cequel[:posts].
         where(row_keys.merge(blog_subdomain: [row_keys[:blog_subdomain]])).

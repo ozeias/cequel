@@ -20,7 +20,7 @@ module Cequel
 
       # @return [Symbol] column name
       attr_reader :column
-      # @return [Object, Array] value or values to match
+      # @return [Object,Array] value or values to match
       attr_reader :value
 
       #
@@ -42,6 +42,8 @@ module Cequel
           else
             ["#{@column} IN (?)", @value]
           end
+        when Set
+          ["#{@column} CONTAINS ?", @value.first]
         else
           ["#{@column} = ?", @value]
         end
