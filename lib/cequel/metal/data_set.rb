@@ -48,6 +48,8 @@ module Cequel
       #   use
       # @since 1.1.0
       attr_reader :query_consistency
+      # @return [Boolean] activating multiple indexes searches
+      attr_reader :query_allow_filtering
 
       def_delegator :keyspace, :write_with_consistency
 
@@ -548,6 +550,19 @@ module Cequel
         end
       end
 
+      #
+      # Allow attempt a potentially expensive query, such as searching a range of rows
+      #
+      # @return [DataSet] new data set to ALLOW FILTERING directive
+      #
+      # @see http://www.datastax.com/documentation/cql/3.1/cql/ddl/ddl_using_multiple_indexes.html
+      #
+      def allow_filtering!
+        clone.tap do |data_set|
+          data_set.query_allow_filtering = true
+        end
+      end
+
       # rubocop:disable LineLength
 
       #
@@ -611,6 +626,7 @@ module Cequel
           .append(*row_specifications_cql)
           .append(sort_order_cql)
           .append(limit_cql)
+          .append(allow_filtering_cql)
           .args
       end
 
@@ -655,7 +671,7 @@ module Cequel
 
       protected
 
-      attr_writer :row_limit, :query_consistency
+      attr_writer :row_limit, :query_consistency, :query_allow_filtering
 
       private
 
@@ -702,6 +718,10 @@ module Cequel
 
       def limit_cql
         row_limit ? " LIMIT #{row_limit}" : ''
+      end
+
+      def allow_filtering_cql
+        query_allow_filtering ? " ALLOW FILTERING" : ''
       end
 
       def sort_order_cql

@@ -649,9 +649,9 @@ module Cequel
       attr_reader :attributes
       hattr_reader :attributes, :select_columns, :scoped_key_values,
                    :row_limit, :lower_bound, :upper_bound,
-                   :scoped_indexed_column, :query_consistency
+                   :scoped_indexed_column, :query_consistency, :allow_filtering
       protected :select_columns, :scoped_key_values, :row_limit, :lower_bound,
-                :upper_bound, :scoped_indexed_column, :query_consistency
+                :upper_bound, :scoped_indexed_column, :query_consistency, :allow_filtering
       hattr_inquirer :attributes, :reversed
       protected :reversed?
 
@@ -761,15 +761,17 @@ module Cequel
                "Can't scope key column #{column_name} without also scoping " \
                "#{missing_column_names.join(', ')}"
         end
-        if scoped_indexed_column
-          fail IllegalQuery,
-               "Can't scope by more than one indexed column in the same query"
-        end
         unless column.indexed?
           fail ArgumentError,
                "Can't scope by non-indexed column #{column_name}"
         end
-        scoped(scoped_indexed_column: {column_name => column.cast(value)})
+
+        if scoped_indexed_column
+          merged_index = scoped_indexed_column.merge(column_name => column.cast(value))
+          scoped(scoped_indexed_column: merged_index, allow_filtering: true)
+        else
+          scoped(scoped_indexed_column: {column_name => column.cast(value)})
+        end
       end
 
       def scoped_key_names

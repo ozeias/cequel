@@ -40,6 +40,7 @@ module Cequel
         add_bounds
         add_order
         set_consistency
+        set_allow_filtering
         data_set
       end
 
@@ -49,7 +50,7 @@ module Cequel
       attr_reader :record_set
       def_delegators :record_set, :row_limit, :select_columns,
                      :scoped_key_names, :scoped_key_values,
-                     :scoped_indexed_column, :lower_bound,
+                     :scoped_indexed_column, :allow_filtering, :lower_bound,
                      :upper_bound, :reversed?, :order_by_column,
                      :query_consistency, :ascends_by?
 
@@ -94,6 +95,12 @@ module Cequel
       def set_consistency
         if query_consistency
           self.data_set = data_set.consistency(query_consistency)
+        end
+      end
+
+      def set_allow_filtering
+        if allow_filtering
+          self.data_set = data_set.allow_filtering!
         end
       end
 
